@@ -1,0 +1,10 @@
+on:
+  issue_comment:
+    types: [created]
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute for pull request comments only
+        if: github.event.issue.pull_request
+        run: echo "This is a pull request comment event"

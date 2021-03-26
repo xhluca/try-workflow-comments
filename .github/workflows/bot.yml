@@ -19,7 +19,20 @@ jobs:
           trigger: '@linkreport'
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+
+      - name: Get branch name (merge)
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
+
+      - name: Get branch name (pull request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
       
+      - name: Debug
+        run: echo ${{ env.BRANCH_NAME }}
+        
       - uses: pCYSl5EDgo/cat@1.0.0
         id: file
         with:

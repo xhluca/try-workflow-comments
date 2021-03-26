@@ -1,0 +1,38 @@
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Broken Link Report
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check
+        uses: khan/pull-request-comment-trigger@master
+        id: check
+        with:
+          trigger: '@linkreport'
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      
+      - uses: pCYSl5EDgo/cat@1.0.0
+        id: file
+        with:
+          path: scripts/generated/report.md
+
+      - name: "Report broken links"
+        uses: actions/github-script@0.3.0
+        if: steps.check.outputs.triggered == 'true'
+        env:
+          DATA: ${{ steps.file.outputs.text }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { issue: { number: issue_number }, repo: { owner, repo }  } = context;
+            console.log(context);
+            github.issues.createComment({ issue_number, owner, repo, body: process.env.DATA }); 
